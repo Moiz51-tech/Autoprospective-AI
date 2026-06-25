@@ -1,0 +1,79 @@
+{
+  "name": "AutoProspect — Campaign Runner (Daily Cron)",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 9 * * 1-5"
+            }
+          ]
+        }
+      },
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.BACKEND_URL }}/api/campaigns/run-scheduled",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Webhook-Secret",
+              "value": "={{ $env.N8N_WEBHOOK_SECRET }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 30000,
+          "retry": {
+            "enabled": true,
+            "maxTries": 3
+          }
+        }
+      },
+      "name": "Run Campaigns",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.status }}",
+              "value2": "ok"
+            }
+          ]
+        }
+      },
+      "name": "Success?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [680, 300]
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [[{"node": "Run Campaigns", "type": "main", "index": 0}]]
+    },
+    "Run Campaigns": {
+      "main": [[{"node": "Success?", "type": "main", "index": 0}]]
+    }
+  },
+  "active": true,
+  "settings": {},
+  "tags": ["autoprospect"],
+  "notes": "Runs weekdays at 9 AM. Requires BACKEND_URL and N8N_WEBHOOK_SECRET env vars set in n8n."
+}

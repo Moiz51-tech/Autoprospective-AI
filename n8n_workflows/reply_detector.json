@@ -1,0 +1,72 @@
+{
+  "name": "AutoProspect — Reply Detector (Gmail Trigger)",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "filters": {
+          "readStatus": "unread",
+          "includeSpamTrash": false
+        }
+      },
+      "name": "Gmail Trigger",
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.BACKEND_URL }}/api/leads/mark-replied",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Webhook-Secret",
+              "value": "={{ $env.N8N_WEBHOOK_SECRET }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "threadId",
+              "value": "={{ $json.threadId }}"
+            },
+            {
+              "name": "email",
+              "value": "={{ $json.from }}"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 10000
+        }
+      },
+      "name": "Mark Lead Replied",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [460, 300]
+    }
+  ],
+  "connections": {
+    "Gmail Trigger": {
+      "main": [[{"node": "Mark Lead Replied", "type": "main", "index": 0}]]
+    }
+  },
+  "active": true,
+  "settings": {},
+  "tags": ["autoprospect"],
+  "notes": "Polls Gmail every minute for new replies and marks the lead as replied in DB."
+}

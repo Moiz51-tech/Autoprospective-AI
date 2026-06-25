@@ -1,0 +1,107 @@
+{
+  "name": "AutoProspect — Follow-up Scheduler",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 10 * * 1-5"
+            }
+          ]
+        }
+      },
+      "name": "Daily Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $env.BACKEND_URL }}/api/leads/due-followups",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Webhook-Secret",
+              "value": "={{ $env.N8N_WEBHOOK_SECRET }}"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 15000
+        }
+      },
+      "name": "Get Due Follow-ups",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "day3_followups",
+        "options": {}
+      },
+      "name": "Split Day-3",
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [680, 200]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.BACKEND_URL }}/api/leads/send-followup",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Webhook-Secret",
+              "value": "={{ $env.N8N_WEBHOOK_SECRET }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "message_id",
+              "value": "={{ $json.id }}"
+            },
+            {
+              "name": "step",
+              "value": "=2"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "name": "Send Day-3 Follow-up",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [900, 200]
+    }
+  ],
+  "connections": {
+    "Daily Trigger": {
+      "main": [[{"node": "Get Due Follow-ups", "type": "main", "index": 0}]]
+    },
+    "Get Due Follow-ups": {
+      "main": [[{"node": "Split Day-3", "type": "main", "index": 0}]]
+    },
+    "Split Day-3": {
+      "main": [[{"node": "Send Day-3 Follow-up", "type": "main", "index": 0}]]
+    }
+  },
+  "active": true,
+  "settings": {},
+  "tags": ["autoprospect"],
+  "notes": "Runs weekdays at 10 AM. Sends day-3 follow-ups. Add a similar branch for day7_followups."
+}

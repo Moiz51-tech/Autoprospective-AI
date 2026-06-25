@@ -1,0 +1,45 @@
+# Environment & secrets
+.env
+*.env.local
+credentials.json
+token.json
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+dist/
+*.egg-info/
+.eggs/
+.venv/
+venv/
+env/
+
+# Logs
+logs/
+*.log
+
+# Runtime
+celerybeat-schedule
+celerybeat.pid
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Streamlit
+.streamlit/
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
