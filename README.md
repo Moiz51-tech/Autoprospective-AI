@@ -1,5 +1,18 @@
 # 🤖 AutoProspect AI
 
+## 📸 Screenshots
+
+### Dashboard
+![Dashboard](screenshots/dashboard.png)
+
+### Leads Database
+![Leads](screenshots/leads.png)
+
+### New Campaign
+![Campaign](screenshots/campaign.png)
+
+### Messages
+![Messages](screenshots/messages.png)
 > AI-powered B2B lead generation & outreach automation.
 > LangGraph multi-agent pipeline · FastAPI · Supabase · n8n · Streamlit
 
